@@ -1,183 +1,485 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For Dileswari ❤️</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #fff0f3 0%, #ffe5ec 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            text-align: center;
-        }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>NEO-HOME 3D Floor Plan - 120FPS Responsive</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root {
+    --bg: #06090f;
+    --fg: #cdf6ff;
+    --ac: #00e5ff;
+    --ac2: #ff2bd6;
+    --panel: rgba(8, 16, 28, 0.72);
+}
+body, html {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    touch-action: none; /* Prevent browser zooming/scrolling */
+}
+body {
+    background: radial-gradient(circle at 50% 45%, #0c2233, var(--bg) 72%);
+}
+.grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(var(--ac) 1px, transparent 1px), linear-gradient(90deg, var(--ac) 1px, transparent 1px);
+    background-size: 44px 44px;
+    opacity: 0.06;
+}
+#view {
+    position: absolute;
+    inset: 0;
+    perspective: 1900px;
+    cursor: grab;
+}
+#view:active {
+    cursor: grabbing;
+}
+/* Hardware acceleration and will-change for 120FPS smoothness */
+#scene, #house, #house * {
+    transform-style: preserve-3d;
+    box-sizing: border-box;
+}
+#scene {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    will-change: transform;
+}
+#house {
+    position: absolute;
+    left: -217px;
+    top: -217px;
+}
+#house * {
+    position: absolute;
+}
+.pad {
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    transform: translateZ(7px);
+}
 
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(255, 77, 109, 0.15);
-            max-width: 400px;
-            width: 85%;
-            position: relative;
-            z-index: 10;
-            border: 1px solid #ffccd5;
-        }
+.lbl {
+    white-space: nowrap;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transform-origin: 0 0;
+    pointer-events: none;
+    padding: 3px 10px;
+    border: 1px solid currentColor;
+    background: var(--panel);
+    border-radius: 4px;
+    text-shadow: 0 0 8px currentColor;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+    will-change: transform;
+    backdrop-filter: blur(4px);
+}
+@keyframes spin { from { transform: translateZ(38px) rotateZ(0); } to { transform: translateZ(38px) rotateZ(360deg); } }
+@keyframes spin2 { from { transform: translateZ(56px) rotateX(72deg) rotateZ(0); } to { transform: translateZ(56px) rotateX(72deg) rotateZ(-360deg); } }
+@keyframes bob { 0%, 100% { transform: translateZ(40px); } 50% { transform: translateZ(54px); } }
+@keyframes scan { from { transform: translateZ(9px) translateY(0); } to { transform: translateZ(9px) translateY(418px); } }
+@keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
 
-        h1 {
-            color: #d90429;
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-            font-family: 'Georgia', serif;
-        }
-
-        p {
-            color: #555;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-
-        /* PHOTO STYLING */
-        .photo-frame {
-            width: 180px;
-            height: 180px;
-            background-color: #fff0f3;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            border: 5px solid #ff4d6d;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .photo-frame img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            position: relative;
-            min-height: 60px;
-        }
-
-        button {
-            padding: 12px 35px;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            font-weight: bold;
-        }
-
-        #yesBtn {
-            background-color: #ff4d6d;
-            color: white;
-            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.4);
-        }
-
-        #yesBtn:hover {
-            transform: scale(1.1);
-            background-color: #d90429;
-        }
-
-        #noBtn {
-            background-color: #e9ecef;
-            color: #333;
-            position: absolute;
-        }
-
-        #success-message {
-            display: none;
-            margin-top: 20px;
-            color: #d90429;
-            font-weight: bold;
-            font-size: 1.5rem;
-            animation: popIn 0.5s ease;
-        }
-
-        @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-    </style>
+/* Tailwind Button Active State Override */
+.btn-on {
+    background-color: var(--ac);
+    color: #021018;
+    box-shadow: 0 0 16px var(--ac);
+    border-color: transparent;
+}
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="photo-frame">
-            <img src="Dileswari.jpeg" alt="Dileswari" onerror="this.style.display='none'; this.parentElement.innerText='❤️'">
-        </div>
+<div class="grid-bg"></div>
 
-        <h1>Will you be mine?</h1>
-        <p>You make every day brighter. <br>I want to spend all my tomorrows with you.</p>
-
-        <div class="buttons">
-            <button id="yesBtn" onclick="acceptProposal()">Yes! ❤️</button>
-            <button id="noBtn" onmouseover="moveButton()" onclick="moveButton()">No</button>
-        </div>
-
-        <div id="success-message">
-            I knew you'd say Yes! 💍<br>Happy Propose Day!
-        </div>
+<div id="view">
+    <div id="scene">
+        <div id="house"></div>
     </div>
+</div>
 
-    <script>
-        function moveButton() {
-            const noBtn = document.getElementById('noBtn');
-            const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 100);
-            
-            noBtn.style.position = 'fixed';
-            noBtn.style.left = x + 'px';
-            noBtn.style.top = y + 'px';
-        }
+<!-- HUD (Top Left) -->
+<div class="absolute left-2 top-2 sm:left-4 sm:top-4 p-3 sm:p-4 bg-black/60 border border-cyan-400/50 rounded-xl backdrop-blur-md shadow-[0_0_15px_rgba(0,229,255,0.3)] z-10 pointer-events-none max-w-[65vw]">
+    <h1 class="m-0 text-sm sm:text-lg font-bold tracking-[0.3em] text-cyan-400 drop-shadow-[0_0_8px_#00e5ff]">NEO·HOME</h1>
+    <p class="m-0 mt-1 sm:mt-2 text-[9px] sm:text-[11px] text-cyan-100/75 tracking-wider leading-relaxed">
+        3 ROOMS · 2 BATH · KITCHEN · LOBBY<br class="hidden sm:block">
+        DRAG = ROTATE · WHEEL/PINCH = ZOOM
+    </p>
+</div>
 
-        function acceptProposal() {
-            document.getElementById('success-message').style.display = 'block';
-            document.getElementById('noBtn').style.display = 'none';
-            document.querySelector('h1').innerText = "YAY!";
-            
-            createConfetti();
-        }
+<!-- Legend (Top Right - Hidden on very small screens) -->
+<div class="absolute right-4 top-4 hidden md:grid gap-2 p-3 bg-black/60 border border-cyan-400/50 rounded-xl backdrop-blur-md shadow-[0_0_15px_rgba(0,229,255,0.3)] text-[11px] tracking-wider text-cyan-100 z-10 pointer-events-none">
+    <span class="flex items-center"><i class="inline-block w-[18px] h-[6px] bg-[#4fd8ff] mr-2 shadow-[0_0_8px_#4fd8ff]"></i>Window</span>
+    <span class="flex items-center"><i class="inline-block w-[10px] h-[10px] border border-pink-500 rounded-tr-full mr-2"></i>Door & Swing</span>
+    <span class="flex items-center"><i class="inline-block w-[10px] h-[10px] border border-white rounded-full mr-2"></i>Exhaust Fan</span>
+</div>
 
-        function createConfetti() {
-            const colors = ['#ff4d6d', '#ff8fa3', '#fff0f3', '#d90429'];
-            for(let i=0; i<60; i++) {
-                const confetti = document.createElement('div');
-                confetti.style.position = 'fixed';
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.top = '-10px';
-                confetti.style.width = Math.random() * 10 + 5 + 'px';
-                confetti.style.height = Math.random() * 10 + 5 + 'px';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.borderRadius = '50%';
-                confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
-                document.body.appendChild(confetti);
-            }
-        }
+<!-- Interaction Toolbar (Bottom Center - Responsive wrapping) -->
+<div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-wrap justify-center w-[95vw] sm:w-max max-w-2xl gap-2 p-2 bg-black/60 border border-cyan-400/40 rounded-xl backdrop-blur-md shadow-[0_0_20px_rgba(0,229,255,0.15)] z-10">
+    <button id="bWall" class="px-3 py-2 text-[10px] sm:text-xs font-semibold tracking-[0.12em] uppercase text-cyan-100 bg-transparent border border-cyan-500/50 rounded-lg transition-all hover:bg-cyan-500/20 active:scale-95">Walls: Full</button>
+    <button id="bLbl" class="btn-on px-3 py-2 text-[10px] sm:text-xs font-semibold tracking-[0.12em] uppercase text-cyan-100 bg-transparent border border-cyan-500/50 rounded-lg transition-all hover:bg-cyan-500/20 active:scale-95">Labels</button>
+    <button id="bAuto" class="btn-on px-3 py-2 text-[10px] sm:text-xs font-semibold tracking-[0.12em] uppercase text-cyan-100 bg-transparent border border-cyan-500/50 rounded-lg transition-all hover:bg-cyan-500/20 active:scale-95">Auto-Spin</button>
+    <button id="bTop" class="px-3 py-2 text-[10px] sm:text-xs font-semibold tracking-[0.12em] uppercase text-cyan-100 bg-transparent border border-cyan-500/50 rounded-lg transition-all hover:bg-cyan-500/20 active:scale-95">Top View</button>
+    <button id="bIso" class="px-3 py-2 text-[10px] sm:text-xs font-semibold tracking-[0.12em] uppercase text-cyan-100 bg-transparent border border-cyan-500/50 rounded-lg transition-all hover:bg-cyan-500/20 active:scale-95">Iso View</button>
+    <button id="bDec" class="btn-on px-3 py-2 text-[10px] sm:text-xs font-semibold tracking-[0.12em] uppercase text-cyan-100 bg-transparent border border-cyan-500/50 rounded-lg transition-all hover:bg-cyan-500/20 active:scale-95">Decor</button>
+</div>
 
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes fall {
-                to { transform: translateY(100vh) rotate(720deg); }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
+<script>
+const H = document.getElementById('house');
+const S = document.getElementById('scene');
+const V = document.getElementById('view');
+
+// Constants
+const AC = '#00e5ff';
+const AC2 = '#ff2bd6';
+
+// State Variables
+let decor = true;
+let wm = 0; // Wall mode (0: Full, 1: Low, 2: Off)
+let showLbl = true;
+let auto = true;
+let labels = [];
+
+// High-Performance Smooth Animation Targets (Lerp variables)
+let rx = 56, targetRx = 56;
+let rz = -35, targetRz = -35;
+let zoom = 1, targetZoom = 1;
+
+// Use Document Fragment to batch DOM insertions for ultra-fast creation
+let currentFragment = null;
+
+// Helper: 3D Box Generation
+function box(x, y, w, d, h, col, o = {}) {
+    const e = document.createElement('div');
+    e.style.left = x + 'px'; e.style.top = y + 'px';
+    e.style.width = w + 'px'; e.style.height = d + 'px';
+    if(o.z) e.style.transform = `translateZ(${o.z}px)`;
+    
+    const face = (st, br) => {
+        const f = document.createElement('div');
+        f.style.background = col;
+        f.style.filter = `brightness(${br})`;
+        Object.assign(f.style, st);
+        e.appendChild(f);
+    };
+    
+    face({left: 0, top: 0, width: w + 'px', height: d + 'px', transform: `translateZ(${h}px)`, boxShadow: o.glow ? `inset 0 0 0 1px ${o.glow}, 0 0 12px ${o.glow}` : 'none'}, 1.15);
+    face({left: 0, top: d + 'px', width: w + 'px', height: h + 'px', transformOrigin: 'top', transform: 'rotateX(90deg)'}, 0.85);
+    face({left: 0, top: 0, width: w + 'px', height: h + 'px', transformOrigin: 'top', transform: 'rotateX(90deg)'}, 0.6);
+    face({left: 0, top: 0, width: h + 'px', height: d + 'px', transformOrigin: 'left', transform: 'rotateY(-90deg)'}, 0.7);
+    face({left: w + 'px', top: 0, width: h + 'px', height: d + 'px', transformOrigin: 'left', transform: 'rotateY(-90deg)'}, 0.5);
+    
+    currentFragment.appendChild(e);
+    return e;
+}
+
+// Helper: Flat Pad
+function pad(x, y, w, d, bg) {
+    const p = document.createElement('div');
+    p.className = 'pad';
+    p.style.left = x + 'px'; p.style.top = y + 'px';
+    p.style.width = w + 'px'; p.style.height = d + 'px';
+    p.style.background = bg;
+    currentFragment.appendChild(p);
+}
+
+// Helper: 3D Floating Label
+function label(t, x, y, z, c) {
+    const l = document.createElement('div');
+    l.className = 'lbl';
+    l.textContent = t;
+    l.style.color = c;
+    l.style.left = x + 'px';
+    l.style.top = y + 'px';
+    l.dataset.z = z;
+    l.style.display = showLbl ? 'block' : 'none';
+    currentFragment.appendChild(l);
+    labels.push(l);
+}
+
+// Helper: Arching Door swing
+function door(hx, hy, r, a0, sw) {
+    const a1 = a0 + sw, R = Math.PI / 180;
+    const p = a => [(r * Math.cos(a * R)).toFixed(1), (r * Math.sin(a * R)).toFixed(1)];
+    const [x0, y0] = p(a0), [x1, y1] = p(a1);
+    
+    const d = document.createElement('div');
+    d.style.cssText = `left:${hx}px;top:${hy}px;width:1px;height:1px;transform:translateZ(8px)`;
+    d.innerHTML = `<svg style="position:absolute;left:0;top:0;overflow:visible" width="1" height="1"><path d="M0 0 L${x0} ${y0} A${r} ${r} 0 0 ${sw > 0 ? 1 : 0} ${x1} ${y1} Z" fill="rgba(255,43,214,.12)" stroke="${AC2}" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`;
+    currentFragment.appendChild(d);
+    
+    const l = box(hx, hy - 1.5, r, 3, 68, '#c98b4a', {glow: AC2});
+    l.style.transformOrigin = '0 50%';
+    l.style.transform = `rotateZ(${a1}deg)`;
+}
+
+// Helper: Generic div
+function div(css, cls) {
+    const d = document.createElement('div');
+    d.style.cssText = css;
+    if(cls) d.className = cls;
+    currentFragment.appendChild(d);
+    return d;
+}
+
+// Helper: Glowing floor pad
+function glowPad(x, y, w, d, c, z = 9, bg) {
+    div(`left:${x}px;top:${y}px;width:${w}px;height:${d}px;background:${bg || c};box-shadow:0 0 12px ${c};transform:translateZ(${z}px)`);
+}
+
+// Helper: Complex Bed Structure
+function bed(x, y, blanket) {
+    box(x - 4, y - 4, 78, 6, 44, '#22313f', {glow: AC});
+    box(x, y, 70, 96, 10, '#141c26', {glow: AC});
+    box(x + 3, y + 4, 64, 88, 16, '#e4edf2');
+    box(x + 3, y + 46, 64, 46, 19, blanket);
+    box(x + 7, y + 8, 26, 14, 22, '#c7d7e2');
+    box(x + 37, y + 8, 26, 14, 22, '#c7d7e2');
+    box(x - 24, y, 14, 14, 16, '#141c26', {glow: '#ffd27a'});
+    box(x + 80, y, 14, 14, 16, '#141c26', {glow: '#ffd27a'});
+    glowPad(x - 10, y + 100, 90, 2, AC2, 9);
+}
+
+// Helper: Simple Plant
+function plant(x, y) {
+    box(x, y, 12, 12, 10, '#1a2430', {glow: AC});
+    box(x - 5, y - 5, 22, 22, 30, 'rgba(40,200,120,.85)', {z: 10});
+}
+
+function decorate() {
+    glowPad(230, 190, 2, 239, AC, 9); // Hallway line
+    glowPad(20, 299, 210, 2, AC, 9);  // Kitchen line
+    
+    // Scanline area
+    div(`left:30px;top:204px;width:130px;height:96px;border:1px solid ${AC2};background:rgba(255,43,214,.08);box-shadow:inset 0 0 20px rgba(255,43,214,.3);transform:translateZ(9px)`);
+    // Scanning beam
+    div('left:6px;top:8px;width:423px;height:3px;background:#ff2bd6;box-shadow:0 0 14px #ff2bd6,0 0 30px #ff2bd6;animation:scan 5s ease-in-out infinite alternate');
+    
+    // Furniture
+    bed(46, 24, '#0a6b53');
+    bed(310, 24, '#0a6b53');
+    bed(338, 286, '#1f5f8c');
+    box(10, 130, 20, 46, 64, '#1a2430', {glow: AC});
+    box(404, 126, 20, 50, 64, '#1a2430', {glow: AC});
+    box(398, 388, 26, 36, 64, '#1a2430', {glow: AC});
+    
+    // Washrooms
+    box(186, 10, 22, 10, 26, '#e9f1f7'); box(188, 20, 18, 20, 14, '#e9f1f7'); box(222, 8, 24, 16, 16, '#e9f1f7', {glow: AC});
+    box(222, 80, 22, 10, 26, '#e9f1f7'); box(224, 90, 18, 20, 14, '#e9f1f7'); box(182, 78, 24, 16, 16, '#e9f1f7', {glow: AC});
+    box(182, 118, 34, 50, 66, 'rgba(79,216,255,.28)', {glow: '#4fd8ff'}); // Shower
+    
+    // Kitchen
+    box(8, 400, 138, 26, 24, '#0b0d12', {glow: AC});
+    box(8, 322, 26, 78, 24, '#0b0d12', {glow: AC});
+    box(70, 350, 50, 24, 22, '#0b0d12', {glow: AC2});
+    box(40, 404, 22, 18, 2, '#222', {glow: AC2, z: 24});
+    box(150, 394, 28, 32, 58, '#aab8c4', {glow: AC}); // Fridge
+    
+    // Lobby
+    box(8, 214, 5, 76, 48, '#02060a', {glow: AC, z: 18}); // TV
+    box(84, 214, 28, 76, 22, '#243447', {glow: AC});      // Sofa base
+    box(110, 214, 6, 76, 40, '#243447', {glow: AC});      // Sofa back
+    box(46, 236, 26, 34, 12, 'rgba(79,216,255,.35)', {glow: AC}); // Coffee table
+    
+    // Holo setup
+    box(200, 246, 22, 22, 10, '#141c26', {glow: AC2});
+    div(`left:180px;top:226px;width:62px;height:62px;border:2px dashed ${AC};border-radius:50%;box-shadow:0 0 14px ${AC};animation:spin 6s linear infinite`);
+    div(`left:186px;top:232px;width:50px;height:50px;border:2px solid ${AC2};border-radius:50%;box-shadow:0 0 12px ${AC2};animation:spin2 5s linear infinite`);
+    div(`left:206px;top:252px;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 16px 6px ${AC};animation:bob 3s ease-in-out infinite`);
+    
+    plant(14, 330); plant(268, 312); plant(272, 196); plant(416, 238);
+    
+    // Corner Pylons
+    [[-16, -16], [443, -16], [-16, 443], [443, 443]].forEach(p => {
+        box(p[0], p[1], 8, 8, 130, 'rgba(0,229,255,.3)', {glow: AC});
+        div(`left:${p[0]-2}px;top:${p[1]-2}px;width:12px;height:12px;border-radius:50%;background:${AC2};box-shadow:0 0 16px 4px ${AC2};transform:translateZ(134px);animation:pulse 2s infinite`);
+    });
+    
+    label('◈ Smart Home Online', 215, 215, 120, AC2);
+}
+
+// Master Build Function
+function build() {
+    currentFragment = document.createDocumentFragment();
+    labels = [];
+    
+    const wh = [90, 24, 0][wm];
+    
+    // Base foundation
+    box(-10, -10, 455, 455, 6, '#0d1420', {glow: AC});
+    pad(6, 6, 423, 423, '#161a20 linear-gradient(rgba(0,229,255,.07) 1px,transparent 1px) 0 0/21px 21px');
+    
+    const g = 'linear-gradient(135deg,#0a5a47,#053f33)';
+    const br = 'linear-gradient(135deg,#7a440a,#5a3007)';
+    [[6, 6, 165, 175, g], [256, 6, 173, 175, g], [177, 6, 73, 62, br], [177, 74, 73, 107, br], [6, 316, 176, 113, br], [293, 271, 136, 158, g]].forEach(r => {
+        pad(...r); 
+        currentFragment.lastChild.style.transform = 'translateZ(8px)';
+    });
+    
+    // Walls
+    if(wh > 0) {
+        [[0,0,435,6],[0,0,6,435],[429,0,6,185],[429,210,6,225],[0,429,213,6],[250,429,185,6],
+         [171,0,6,187],[0,181,102,6],[125,181,52,6],[177,181,26,6],[226,181,27,6],[250,181,17,6],[291,181,144,6],
+         [250,0,6,31],[250,51,6,136],[177,68,76,6],
+         [0,310,133,6],[155,310,33,6],[182,310,6,125],[287,265,6,43],[287,330,6,105],[290,265,145,6]]
+         .forEach(w => box(...w, wh, '#dfe9ee', {glow: AC}));
+         
+        // Windows
+        [[72,-1,29,8],[336,-1,29,8],[99,428,28,8],[349,428,28,8],[-1,100,8,28],[-1,248,8,28],[-1,363,8,28],[428,80,8,28],[428,324,8,28]]
+         .forEach(w => box(...w, 34, 'rgba(79,216,255,.7)', {glow: '#4fd8ff', z: 26}));
+         
+        // Exhaust
+        const fan = document.createElement('div');
+        fan.style.cssText = 'left:207px;top:-2px;width:14px;height:14px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px #fff;transform:translateZ(66px) rotateX(90deg)';
+        currentFragment.appendChild(fan);
+    }
+    
+    // Doors
+    [[102,184,23,0,-90],[203,184,23,0,-90],[291,184,24,180,90],[253,31,21,90,90],[155,313,22,180,-90],[290,308,22,90,-90],[213,435,37,0,-90],[435,185,25,90,90]].forEach(d => door(...d));
+    
+    // Stairs
+    for(let i=0; i<9; i++) box(295 + i*13.1, 225, 13.1, 38, 12 + i*7, '#26384d', {glow: i % 2 ? null : AC});
+    
+    if(decor) decorate();
+    
+    // Labels
+    label('Room 1', 88, 93, 50, '#6cf0c8'); label('Room 2', 344, 93, 50, '#6cf0c8'); label('Room 3', 365, 366, 50, '#6cf0c8');
+    label('Washroom 2', 214, 36, 40, '#ffb347'); label('Washroom 1', 214, 126, 40, '#ffb347'); label('Kitchen', 94, 372, 40, '#ffb347');
+    label('Lobby', 140, 225, 30, '#fff'); label('Stairs to terrace', 355, 205, 80, '#fff'); label('Main door', 233, 458, 10, '#fff'); label('Exhaust fan', 214, -12, 70, '#fff');
+    
+    // Append in one go for fast render
+    H.innerHTML = '';
+    H.appendChild(currentFragment);
+}
+
+let lastTime = performance.now();
+
+// Updates the exact CSS styles
+function updateTransforms() {
+    S.style.transform = `scale(${zoom}) rotateX(${rx}deg) rotateZ(${rz}deg)`;
+    for(let i=0; i<labels.length; i++){
+        labels[i].style.transform = `translateZ(${labels[i].dataset.z}px) rotateZ(${-rz}deg) rotateX(${-rx}deg) translate(-50%,-50%)`;
+    }
+}
+
+// 120 FPS Loop Engine with Lerp (Linear Interpolation)
+function loop(now) {
+    const dt = now - lastTime;
+    lastTime = now;
+    
+    // Speed factor to normalize rotation speed regardless of frame rate (60Hz vs 120Hz)
+    const speedFactor = dt / 16.666; // 1 at 60fps, 0.5 at 120fps
+    
+    if (auto) {
+        targetRz += 0.15 * speedFactor; // Constant spin speed
+    }
+    
+    // Smooth Lerp physics for incredibly fluid dragging and zooming
+    // Difference between target and current multiplied by easing factor
+    rx += (targetRx - rx) * 0.12 * speedFactor;
+    rz += (targetRz - rz) * 0.12 * speedFactor;
+    zoom += (targetZoom - zoom) * 0.15 * speedFactor;
+
+    // Only update DOM if things have actually changed (threshold check prevents micro-jitter)
+    if(Math.abs(targetRx - rx) > 0.01 || Math.abs(targetRz - rz) > 0.01 || Math.abs(targetZoom - zoom) > 0.001 || auto) {
+        updateTransforms();
+    }
+    
+    requestAnimationFrame(loop);
+}
+
+let drag = null, pts = {}, pd = 0;
+
+V.addEventListener('pointerdown', e => {
+    V.setPointerCapture(e.pointerId);
+    pts[e.pointerId] = e;
+    drag = { x: e.clientX, y: e.clientY };
+    auto = false;
+    document.getElementById('bAuto').classList.remove('btn-on');
+});
+
+V.addEventListener('pointermove', e => {
+    pts[e.pointerId] = e;
+    const k = Object.values(pts);
+    
+    // Pinch to Zoom (Multi-touch)
+    if (k.length === 2) {
+        const d = Math.hypot(k[0].clientX - k[1].clientX, k[0].clientY - k[1].clientY);
+        if (pd) targetZoom = Math.min(3.5, Math.max(0.2, targetZoom * (d / pd)));
+        pd = d;
+        return;
+    }
+    
+    // Drag to Rotate
+    if (!drag || !pts[e.pointerId]) return;
+    
+    // Apply delta to targets (Lerp loop handles the rest)
+    targetRz += (e.clientX - drag.x) * 0.4;
+    targetRx = Math.min(90, Math.max(0, targetRx - (e.clientY - drag.y) * 0.3));
+    
+    drag = { x: e.clientX, y: e.clientY };
+});
+
+const up = e => { delete pts[e.pointerId]; pd = 0; drag = null; };
+V.addEventListener('pointerup', up);
+V.addEventListener('pointercancel', up);
+
+// Mouse Wheel Zoom
+V.addEventListener('wheel', e => {
+    e.preventDefault();
+    targetZoom = Math.min(3.5, Math.max(0.2, targetZoom * (e.deltaY > 0 ? 0.85 : 1.15)));
+}, { passive: false });
+
+// Button Logic
+document.getElementById('bWall').onclick = function() {
+    wm = (wm + 1) % 3;
+    this.textContent = 'Walls: ' + ['Full', 'Low', 'Off'][wm];
+    build();
+};
+document.getElementById('bLbl').onclick = function() {
+    showLbl = !showLbl;
+    this.classList.toggle('btn-on', showLbl);
+    labels.forEach(l => l.style.display = showLbl ? 'block' : 'none');
+};
+document.getElementById('bAuto').onclick = function() {
+    auto = !auto;
+    this.classList.toggle('btn-on', auto);
+};
+document.getElementById('bDec').onclick = function() {
+    decor = !decor;
+    this.classList.toggle('btn-on', decor);
+    build();
+};
+
+const stopAuto = () => { auto = false; document.getElementById('bAuto').classList.remove('btn-on'); };
+
+document.getElementById('bTop').onclick = () => { stopAuto(); targetRx = 90; targetRz = 0; };
+document.getElementById('bIso').onclick = () => { stopAuto(); targetRx = 56; targetRz = -35; };
+
+// Responsive Fitting
+function fit() {
+    // Calculates ideal zoom scale based on screen width/height to ensure the whole 3D model fits comfortably
+    const newZoom = Math.max(0.3, Math.min(window.innerWidth / 760, window.innerHeight / 720));
+    targetZoom = newZoom;
+    
+    // Force immediate sync for resize so it doesn't float sluggishly
+    zoom = targetZoom; 
+    updateTransforms();
+}
+
+// Initial Kick-off
+window.addEventListener('resize', fit);
+build();
+fit();
+requestAnimationFrame(loop); // Start the 120 FPS Loop
+</script>
 </body>
 </html>
